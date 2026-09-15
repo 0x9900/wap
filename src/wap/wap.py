@@ -30,7 +30,7 @@ from jinja2 import Environment, FileSystemLoader
 from matplotlib import font_manager
 from scipy.interpolate import pchip_interpolate, splev, splrep
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 # Fix that!
 try:
