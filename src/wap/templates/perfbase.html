@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | replace("<br>", " - ") }}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+    {% include 'base.css' %}
+    {% include 'perf.css' %}
+    </style>
+  </head>
+  <body>
+    <header id="top">
+        <h1>{% block title %}Antenna Performance for {{call}}{% endblock %}</h1>
+    </header>
+    <main>
+      {% block content %}
+      <!-- Content from child templates will be injected here -->
+      {% endblock %}
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <p>About <a href="https://bsdworld.org/about.html">BSDWord.org</a><br>
+            C4FM reflector for the San Francisco Bay <a href="http://ysf.bsdworld.org/">Bayarea-YSF Dashboard</a><br>
+            Fred's <a href="https://0x9900.com/static/VSWR.html">Scratchbook</a> -
+            <a target="_blank" href="/qsl_cards/">QSL Cards'</a> collection.</p>
+        </div>
+      <!-- Copyright -->
+      <div class="text-center">
+        <p>Copyright © 2026 Fred W6BSD <a class="text-white-50" href="https://0x9900.com/">0x9900.com</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

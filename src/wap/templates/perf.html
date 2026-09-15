@@ -1,0 +1,296 @@
+{% extends "perfbase.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div class="note">
+    Because the plots are built from real reception reports rather than models, they provides a
+    <b>practical view of how the antenna performs</b> on the air, helping to compare bands, antenna
+    configurations, and installation changes under real propagation conditions.
+</div>
+
+<div id="stats">
+    <div class="title">Antenna performance calculated by <a href="https://wspr.bsdworld.org/">wspr.bsdword.org</a> using <a href="https://www.wsprnet.org/drupal/wsprnet/map">WSPR data</a>.</div>
+    <ul>
+        <li>Report date: <b>{{ date.strftime('%Y-%m-%d %H:%M') }} UTC</b></li>
+        <li>Station call sign: <b>{{ call }}</b></li>
+        <li>Grid locator: <b>{{ data.iloc[0]['tx_loc'] }}</b></li>
+        {% if antenna %}
+        <li>Antenna: <b>{{ antenna }}</b></li>
+        {% endif %}
+        <li>WSPR data:
+            <b>from: {{ start.strftime('%Y-%m-%d %H:%M') }}
+                <span style="display: inline-block; width: 10px;"></span>
+                to: {{ end.strftime('%Y-%m-%d %H:%M') }}</b>
+        </li>
+        <li>
+            {% if data.shape[0] < 150 %}
+            Data processed: <b>{{ data.shape[0] }}</b> <span class="warning">You don't have enough spots</span>
+            {% else %}
+            Data processed: <b>{{ data.shape[0] }}</b>
+            {% endif %}
+        </li>
+        <li>Transmit power anounced:
+            {% if data.power.min() == data.power.max() %}
+            <b>{{ data.power.mean() | int }}</b> dBm <i>({{ "{:.3f}".format(10**((data.power.mean() - 30) / 10)) }}Watt)</i>
+            {% else %}
+            Min: <b>{{ data.power.min() | int }}</b> dBm -
+            Avg: <b>{{ data.power.mean() | int }}</b> dBm <i>({{ "{:.3f}".format(10**((data.power.mean() - 30) / 10)) }}W)</i> -
+            Max: <b>{{ data.power.max() | int }}</b> dBm
+            {% endif %}
+        </li>
+        <li>Max distance: <b>{{ data.distance.max() }}</b> km</li>
+        <li>Band tested:
+            {% if data.band.unique() | length > 1 %}
+            <table class="results">
+                <tr><th>Band</th><th>Spots</th><th>Comment</th></tr>
+                {% set errors = [] %}
+                {% for b in data.band.unique() | sort %}
+                {% set count = data[data.band == b]['id'].count() %}
+                <tr>
+                    <td style="text-align: right;">{{ b }}</td>
+                    <td style="text-align: left;">{{ count }}</td>
+                    <td style="text-align: left;">
+                    {% if count < 100 %}
+                        <span class="dim">Not enough spots for an accurate assessment</span>
+                    {% else %}
+                    <span class="highlight">OK</span>
+                    {% endif %}
+                    </td>
+                </tr>
+                {% if count < 100 %}{{ errors.append(1) or "" }}{% endif %}
+                {% endfor %}
+            </table>
+            {% else %}
+            {% for b in data.band.unique() | sort %}
+            <b>{{ b }}</b>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            {% endif %}
+        </li>
+    </ul>
+</div>
+
+{% if errors %}
+<div class="warning">
+    Remove bands with insufficient spots before generating the report.
+</div>
+{% endif %}
+
+{% if "azimuth_scatter" in graphs %}
+<div class="container">
+    <h2 id="azimuth_scatter">Distance and density</h2>
+    <div class="legend">
+        <p>This polar scatter plot shows the <b>75th percentile</b> of WSPR spot distances by azimuth from the transmitting station. Each point marks the distance below which 75% of WSPR reports were received in that direction. The angle shows the receiving station's direction, and the radius shows this distance.</p>
+
+        <p>Clusters of points in certain directions show where the antenna system and propagation support stronger and more reliable signals. On the other hand, gaps or shorter distances might mean there are directional nulls, local obstacles, ground effects near the antenna, <b>or not many receiving stations</b> in those directions.</p>
+    </div>
+    <img src="{{ graphs["azimuth_scatter"][1] }}" alt="{{ graphs["azimuth_scatter"][0] }}">
+</div>
+{% endif %}
+
+{% if "radiation_pattern" in graphs %}
+<div class="container">
+    <h2 id="radiation_pattern">Radiation pattern</h2>
+    <div class="legend">
+        <p>This polar plot shows the <b>75th percentile</b> of WSPR reception distance by azimuth, which is the range where contacts are almost always possible. In each direction, the line marks how far a reliable signal can reach. Lobes in some directions show where the antenna and propagation support stronger, more reliable signals. Nulls indicate obstacles, ground effects, or just fewer receiving stations in those directions. This approach makes it easy to compare how well the antenna works in different directions and on different bands.</p>
+
+        <p>When the plot shows multiple bands, the differences in shape and size reveal how the antenna and propagation change with frequency. This makes it easier to compare how well the antenna works in different directions and how far it can reach on each band during real operating conditions.</p>
+    </div>
+    <img src="{{ graphs["radiation_pattern"][1] }}" alt="{{ graphs["radiation_pattern"][0] }}">
+</div>
+{% endif %}
+
+{% if "band_distance" in graphs %}
+<div class="container">
+    <h2 id="band_distance">Distance / band</h2>
+    <div class="legend">
+        <p>This <a href="javascript:void(0);" onclick="show_help('boxplot');" style="color: #0066cc; cursor: help; text-decoration: underline dashed;">boxplot</a> summarizes the distribution of WSPR reception distances for each band.</p>
+
+        <p>The median and quartiles indicate the typical propagation range and its variability, while the whiskers and outliers represent less common short- and long-distance paths. Comparing bands shows how propagation and antenna effectiveness vary with frequency, offering a concise view of which bands provide consistent coverage or occasional long-distance reach.</p>
+        <p><b>Extreme outliers have been removed</b> to more accurately reflect antenna performance.</p>
+    </div>
+    <img src="{{ graphs["band_distance"][1] }}" alt="{{ graphs["band_distance"][0] }}">
+</div>
+{% endif %}
+
+{% if "hours_distance" in graphs %}
+<div class="container">
+    <h2 id="hours_distance">Distance / hour</h2>
+    <div class="legend">
+        <p>This <a href="javascript:void(0);" onclick="show_help('boxplot');" style="color: #0066cc; cursor: help; text-decoration: underline dashed;">boxplot</a> shows the distribution of WSPR reception distances across all bands by hour of day.</p>
+
+        <p>The median and spread show how the propagation range changes throughout the day, with longer distances at night and shorter distances during the day. Aggregating multiple spots allows the plot to highlight when each band-antenna combination is most effective for reaching distant receivers. Extreme outliers have been removed to improve the accuracy of antenna performance assessment.</p>
+    </div>
+    <img src="{{ graphs["hours_distance"][1] }}" alt="{{ graphs["hours_distance"][0] }}">
+</div>
+{% endif %}
+
+{% if "plot_snr_vs_distance" in graphs %}
+<div class="container">
+    <h2 id="plot_snr_vs_distance">Signal strength vs distance</h2>
+    <div class="legend">
+        <p>This graph shows how signal strength (SNR) changes with distance.</p>
+
+        <p>The median SNR shows the typical signal strength you can expect at each distance, and it drops as distance increases. The 10th and 90th percentile curves show the usual range of performance. As the gap between these percentiles widens at longer distances, it means there is more variation in long-path propagation.</p>
+    </div>
+    <img src="{{ graphs["plot_snr_vs_distance"][1] }}" alt="{{ graphs["plot_snr_vs_distance"][0] }}">
+</div>
+{% endif %}
+
+{% if "snr_distance_errorbar" in graphs %}
+<div class="container">
+    <h2 id="snr_distance">SNR vs distance</h2>
+    <div class="legend">
+        <p>The vertical bars show the typical signal strength (SNR) at each distance. The light blue line shows how many spots occur at each distance, as shown on the right-side axis.</p>
+
+        <p>The graph below shows how signal strength changes with distance. Signal-to-noise ratio (SNR) measures how clear the signal is compared to background noise, and it usually drops as you move farther away. A DX antenna can help keep the signal stronger over longer distances.</p>
+    </div>
+    <img src="{{ graphs["snr_distance_errorbar"][1] }}" alt="{{ graphs["snr_distance_errorbar"][0] }}">
+</div>
+{% endif %}
+
+{% if "takeoff_angle" in graphs %}
+<div class="container">
+    <h2 id="takeoff_angle">Estimated takeoff angle</h2>
+    <div class="legend">
+      <p>The chart shows the estimated antenna <a href="javascript:void(0);" onclick="show_help('takeoff');" style="color: #0066cc; cursor: help; text-decoration: underline dashed;">takeoff angles</a> ranges for each frequency band, based on contact distances. Each arc represents a band and highlights the range of angles linked to the most successful contacts.</p>
+
+      <p>Higher takeoff angles lead to shorter, more local contacts, while lower angles are linked to longer-distance (DX) paths. Bands with arcs closer to 0° have more low-angle radiation, which is usually better for long-distance communication.</p>
+    </div>
+    <img src="{{ graphs["takeoff_angle"][1] }}" alt="{{ graphs["takeoff_angle"][0] }}">
+</div>
+{% endif %}
+
+{% if map %}
+<div class="container">
+    <h2 id="graph-7}">Spot map</h2>
+    <div class="legend">
+        <p>This interactive map shows all the information for each spot.</p>
+    </div>
+    {{ map|safe }}
+</div>
+{% endif %}
+
+<!-- popup help -->
+<div id="boxplot" class="modal" style="display: none;">
+    <div class="modal-card">
+        <span class="close">&times;</span>
+        <div class="help_title">Understanding Boxplots</div>
+        <div class="modal-content">
+            <p>A boxplot is a visual tool that displays how data is distributed. It shows the middle 50% of the data in a box, with the median marked by a line inside.</p>
+            <p>The ends of the box represent the 25th and 75th percentiles, while whiskers extend to the smallest and largest values. Outliers appear as individual points beyond the whiskers.</p>
+            <p>Boxplot on <a href="https://en.wikipedia.org/wiki/Box_plot" target="wikipedia">Wikipedia</a>.
+        </div>
+    </div>
+</div>
+
+<div id="takeoff" class="modal" style="display: none;">
+    <div class="modal-card">
+        <span class="close">&times;</span>
+        <div class="help_title">Understanding Takeoff Angle</div>
+        <div class="modal-content">
+            <p><b>Median takeoff angle decreases with increasing band frequency.</b></p>
+            <ul>
+                <li>Higher angles (40-70°) optimal for regional/NVIS propagation</li>
+                <li>Moderate angles (10-45°) supporting mixed propagation modes</li>
+                <li>Lower angles (0-20°) enabling long-distance multi-hop DX</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 1. Backdrop Overlay */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+  backdrop-filter: blur(4px); /* Modern blur effect */
+  display: flex; /* Centers the content easily */
+  align-items: center;
+  justify-content: center;
+}
+
+/* 2. The Modal Card */
+.modal-card {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 550px;
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+/* 3. Typography & Spacing */
+.help_title {
+  margin-top: 0;
+  color: #333;
+  font-family: sans-serif;
+  font-size: 1.5rem;
+  color: #070;
+}
+
+.modal-content {
+  line-height: 1.6;
+  color: #555;
+  font-family: sans-serif;
+}
+
+/* 4. Close Button */
+.close {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  font-size: 1.8rem;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close:hover {
+  color: #333;
+}
+
+/* 5. Simple Entrance Animation */
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+window.show_help = function(elemname) {
+  const modal = document.getElementById(elemname);
+  if (!modal) {
+    console.error("Modal element not found");
+    return;
+  }
+
+  modal.style.display = "flex";
+
+  const handleClosing = (event) => {
+    const isEscape = event.key === 'Escape';
+    const isClickOutside = event.target === modal;
+    const isCloseBtn = event.target.classList.contains('close');
+
+    if (isEscape || isClickOutside || isCloseBtn) {
+      modal.style.display = "none";
+      document.removeEventListener('keyup', handleClosing);
+      modal.removeEventListener('click', handleClosing);
+    }
+  };
+
+  document.addEventListener('keyup', handleClosing);
+  modal.addEventListener('click', handleClosing);
+};
+</script>
+
+{% endblock %}

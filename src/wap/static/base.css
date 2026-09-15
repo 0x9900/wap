@@ -1,0 +1,305 @@
+/*
+ * style.css
+ * Copyright © 2026 Fred W6BSD
+ *
+ * Distributed under terms of the BSD 3-Clause license.
+ */
+body {
+	background-color: #fdfdff;
+	color: #333;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 16px;
+  line-height: 1.6em;
+  margin: 0;
+  min-height: 100vh;
+  padding: 0;
+}
+
+header {
+  background: linear-gradient(135deg, #0a2342, #1c3d73);
+  color: #DAF7A6;
+  font-family: Arial, sans-serif;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+header h1 {
+  margin: 1em 0;
+  text-align: center;
+  font-size: 3rem;
+}
+
+header ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  justify-content: center;   /* center horizontally */
+  gap: 1.5rem;               /* spacing between items */
+}
+
+header li a {
+  color: #fff;
+  background: #335;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #777;
+
+}
+
+header ul a:hover,
+header ul a:focus {
+  background: #337;
+}
+
+header ul a[aria-current="page"] {
+  background: #686;
+}
+
+main {
+  flex: 1;
+  padding: 3em;
+  padding-bottom: 5em;
+  border-left: 2px solid #ccc;
+  border-right: 2px solid #ccc;
+  margin: 0 auto;
+  width: 900px;
+}
+
+main h2 {
+  border-top: 4px solid #f80;
+  color: #512E5F;
+  font-size: 2em;
+  padding-right: 1.7em;
+  padding-top: .25em;
+  text-align: left;
+}
+
+main h3 {
+  color: #512E5F;
+  background-color: #ddeeff;
+  padding: 1em 0 .5em .5em;
+  border-bottom: 3px solid #f80;
+  font-family: Helvetica, sans-serif;
+  font-weight: Bold;
+  margin-top: 2em;
+}
+
+main .container {
+  margin-left: 2.5em;
+  margin-top: 2.5em;
+}
+
+main a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main a:hover {
+  text-decoration: underline;
+}
+
+main img {
+  border-radius: 6px;
+  width: 100%;
+}
+
+table.power {
+  width: 50%;
+  font-family: Arial;
+  border-collapse: collapse;
+  margin: 20px auto;
+  background: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.power th {
+  background-color: #4a90e2;
+  color: white;
+  padding: 6px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #777;
+}
+
+.power td {
+  padding: 6px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: right;
+  border: 1px solid #ddd;
+}
+
+.power tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.power tr:hover {
+  background-color: #e3f2fd;
+}
+
+.power tr:last-child td {
+  border-bottom: none;
+}
+
+.form-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 2em auto;
+}
+
+.form-container h2 {
+    all: unset;
+    font-family: 'Arial', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0a2342;
+    text-align: center;
+    display: block;
+}
+
+.form-container hr {
+  border: 0;
+  border-top: 1px solid #0a2342;
+  margin: 1.5rem 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+select {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 16px;
+  color: #333;
+  width: 200px;
+  height: 45px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+footer {
+  font-size: .8em;
+	background-color: #322;
+	text-align: right;
+  color: #cccccc;
+  line-height: 1.1rem;
+  margin-top: 0em;
+  padding: 1em 4em;
+}
+
+footer a {
+  color: yellow;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+.result {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.error,
+.status {
+  border-radius: 8px;
+  padding: 1.5em 2em;
+  margin: 2em 3em;
+}
+
+.status {
+  background-color: #dfd;
+  border: 3.5px solid #daa;
+}
+
+.error {
+  color: #fff;
+  font-weight: bold;
+  background-color: #f44;
+  border: 3.5px solid #faa;
+}
+
+.center {
+  text-align: center;
+}
+
+.band-pill-group input[type=checkbox] { display: none; }
+
+.band-pill-group label {
+  cursor: pointer;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  color: #333;
+  background-color: #efe;
+  user-select: none;
+  display: inline-block;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+.band-pill-group input[type=checkbox]:checked + label {
+  background: #dbeaff;
+  color: #55d;
+  border-color: #55d;
+  font-weight: 500;
+}

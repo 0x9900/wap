@@ -1,0 +1,73 @@
+/*
+ * perf.css
+ * Copyright © 2026 Fred W6BSD
+ *
+ * Distributed under terms of the BSD 3-Clause license.
+ */
+
+.legend {
+  line-height: 1.6em;
+  padding-left: 2em;
+  padding-right: 2em;
+  margin-bottom: 1.5em;
+}
+
+.note {
+  background-color: #eeffee;
+  border-radius: 8px;
+  padding: 1.5em 2em;
+  margin: 2em 3em;
+  border: 3.5px solid #ada;
+}
+
+#stats {
+  font-family: "Avenir Next", "Avenir", Arial, Helvetica, Roboto, sans-serif;
+  margin: 3rem 6rem;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  background-color: #ddd;
+}
+
+#stats .title {
+  font-weight: bold;
+  padding: .5em;
+  border-bottom: 1px solid #aba;
+}
+
+#stats ul {
+  border-radius: 0 0 8px 8px;
+  background-color: #eee;
+  list-style: none;
+  padding: 1.2rem;
+  margin: 0;
+}
+
+#stats li {
+  padding: 2px 0;
+  color: #333;
+}
+
+table.results {
+  margin-left: 2em;
+  border-collapse: collapse;
+}
+
+.results td, .results th {
+  padding: 5px 12px;
+  border: 1px solid #ccc;
+}
+
+.warning {
+  margin-left: 1em;
+  padding: 0 1em;
+  font-weight: bold;
+  background-color: red;
+  color: white;
+}
+.dim {
+  color: #f99;
+}
+.highlight {
+  color: #66c;
+  font-weight: 600;
+}
