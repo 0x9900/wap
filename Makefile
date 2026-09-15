@@ -21,7 +21,7 @@ all: pre-commit pylint
 
 # Clean: Remove build artifacts and cache
 clean:
-	rm -rf build/ dist/ *.egg-info/ __pycache__/
+	rm -rf build/ *.egg-info/ __pycache__/
 
 # Pre-commit: Run pre-commit hooks
 pre-commit:
@@ -41,3 +41,7 @@ dev:
 
 dep:
 	pip install --only-deps .
+
+upload: build
+	wheel=$$(ls -t dist/*.whl | head -n 1); \
+	python -m twine check $$wheel

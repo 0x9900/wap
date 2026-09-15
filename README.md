@@ -36,7 +36,7 @@ By gathering data over time and distance, WAP shows overall antenna behavior ins
 
 1. Hams transmit WSPR signals
 2. Visit https://wspr.bsdworld.org/ to create plots for the bands and distance ranges you choose
-3. WAP gathers WSPR spot data for your callsign
+3. WAP gathers WSPR spot data for your call-sign
 4. Compare directional patterns between different antennas, setups, or time periods
 
 This process makes WAP helpful for:

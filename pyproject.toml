@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "wap"
+name = "WAP-Tool"
 dynamic = ["version"]
 description = "Use WSPR data to analyze your antenna's performance"
 readme = "README.md"
@@ -53,6 +53,7 @@ dev = [
     "mypy",
     "pre-commit",
     "pylint",
+    "twine",
 ]
 
 [tool.mypy]

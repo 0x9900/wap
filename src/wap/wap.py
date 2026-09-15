@@ -891,13 +891,21 @@ def gen_filename(call, days, bands):
   return f'{filename}.html'
 
 
-def _fetch_and_filter(call, days, bands):
-  """Fetch WSPR data and apply band filters. Raises on failure."""
+def fetch_and_filter(call, days, bands):
+  """Fetch WSPR data and apply band filters.
+  Args:
+    call: str
+    days: int
+    bands: list[str] e.g. ['40m', '20m']
+  Raises on failure.
+  """
+  bands = [b.lower() for b in bands]
   _days = f"{days}d"
   df = get_data(call, _days)
 
   if df.empty:
     raise ValueError(f"No data found for {call}")
+
   if 'all' not in bands:
     df = df[df['band'].isin(bands)]
     if df.empty:
@@ -911,38 +919,9 @@ def _fetch_and_filter(call, days, bands):
   return df
 
 
-@log_calls
-def handle_call(call, days, antenna, bands, target_dir='/var/tmp'):
-  logger_setup('/var/tmp/wap.log')
-  target_dir = Path(target_dir) if isinstance(target_dir, str) else target_dir
-  target_dir.mkdir(exist_ok=True)
-  bands = [v.lower() for v in bands]
-
-  filename = gen_filename(call, days, bands)
-  outfile = target_dir / filename
-  if outfile.exists():
-    logging.info('%s already exists', outfile)
-    return {"status": "complete", "filename": filename}
-
-  try:
-    df = _fetch_and_filter(call, days, bands)
-  except ValueError as err:
-    raise RuntimeError(str(err)) from err  # avoid bare Exception
-
-  logging.info("%d records", df.shape[0])
-
-  try:
-    render_html(df, outfile, call, antenna)
-  except Exception as err:
-    logging.exception("Error in handle_call for %s", call)  # logs traceback automatically
-    raise RuntimeError(f"Failed to process {call}: {err}") from err
-
-  return {"status": "complete", "filename": filename}
-
-
 def run_call(call, days, antenna, bands, outfile):
   try:
-    df = _fetch_and_filter(call, days, bands)
+    df = fetch_and_filter(call, days, bands)
   except ValueError as err:
     logging.error(err)
     return
