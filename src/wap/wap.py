@@ -30,8 +30,6 @@ from jinja2 import Environment, FileSystemLoader
 from matplotlib import font_manager
 from scipy.interpolate import pchip_interpolate, splev, splrep
 
-__version__ = '0.1.1'
-
 # Fix that!
 try:
   from .webmap import plot_map
@@ -105,54 +103,59 @@ FLIERPROPS = {
 
 HF_BANDS = set(["160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m"])
 
-_BANDS = [
-  (-99, "All"),
-  (1, "160m"),
-  (3, "80m"),
-  (5, "60m"),
-  (7, "40m"),
-  (10, "30m"),
-  (14, "20m"),
-  (18, "17m"),
-  (21, "15m"),
-  (24, "12m"),
-  (28, "10m"),
-  (50, "6m"),
-  (70, "4m"),
-  (144, "2m"),
-  (432, "7cm"),
-  (1296, "23cm"),
-  (-1, "2200m"),
-  (0, "640m"),
-]
 
-
-class BandLookup:
-  def __init__(self, bands):
-    self.bands = bands
-    self.lookup_dict = {}
-    for item in bands:
-      if len(item) != 2:
-        raise ValueError('The argument must be a tuple of 2 elements')
-      _a, _b = item
-      self.lookup_dict[_a] = _b
-      self.lookup_dict[_b] = _a
-
-  def __getitem__(self, key):
-    if key not in self.lookup_dict:
+class _BandLookupMeta(type):
+  def __getitem__(cls, key):
+    if key not in cls.lookup_dict:
       raise KeyError(f"{key} not found")
-    return self.lookup_dict[key]
+    return cls.lookup_dict[key]
 
-  def labels(self):
-    return [v[1] for v in self.bands]
+  def get(cls, key, default=None):
+    if key not in cls.lookup_dict:
+      return default
+    return cls.lookup_dict[key]
 
 
-BANDS = BandLookup(_BANDS)
+class WSPRBand(metaclass=_BandLookupMeta):
+  _BANDS = [
+    (-99, "All"),
+    (1, "160m"),
+    (3, "80m"),
+    (5, "60m"),
+    (7, "40m"),
+    (10, "30m"),
+    (14, "20m"),
+    (18, "17m"),
+    (21, "15m"),
+    (24, "12m"),
+    (28, "10m"),
+    (50, "6m"),
+    (70, "4m"),
+    (144, "2m"),
+    (432, "7cm"),
+    (1296, "23cm"),
+    (-1, "2200m"),
+    (0, "640m"),
+  ]
+
+  lookup_dict = {}
+  for _a, _b in _BANDS:
+    lookup_dict[_a] = _b
+    lookup_dict[_b] = _a
+  del _a, _b
+
+  @classmethod
+  def labels(cls):
+    return [v[1] for v in cls._BANDS]
+
+  @classmethod
+  def as_dict(cls):
+    return dict(cls._BANDS)
 
 
 class BandValidator(argparse.Action):
   def __call__(self, parser, namespace, values, option_string=None):
-    valid_bands = BANDS.labels()
+    valid_bands = WSPRBand.labels()
     values = [v.lower() for v in values]
 
     if 'all' in values and len(values) > 1:
@@ -305,7 +308,7 @@ def get_data(call, delta):
 
   data["band"] = (
     (data["band"].astype(float))
-    .map(dict(BANDS.bands))
+    .map(WSPRBand.as_dict())
   )
   data["time"] = pd.to_datetime(data["time"], format="%Y-%m-%d %H:%M:%S")
   return data

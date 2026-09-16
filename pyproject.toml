@@ -42,7 +42,7 @@ wap = "wap.wap:main"
 packages = ["src/wap"]
 
 [tool.hatch.version]
-path = "src/wap/wap.py"
+path = "src/wap/__init__.py"
 
 [project.optional-dependencies]
 dev = [
