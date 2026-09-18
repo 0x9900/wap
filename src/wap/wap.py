@@ -32,6 +32,8 @@ from scipy.interpolate import pchip_interpolate, splev, splrep
 
 __version__ = '0.1.1'
 
+plt.switch_backend("Agg")   # force non-interactive backend, no GUI overhead
+
 # Fix that!
 try:
   from .webmap import plot_map
@@ -354,7 +356,7 @@ def plot2string(call, fmt='webp'):
   fig = plt.gcf()
   fig.text(.01, .015, SIGNATURE.format(year, call), fontsize=8, color='dimgray')
   buf = BytesIO()
-  plt.savefig(buf, format=fmt, dpi=150)
+  plt.savefig(buf, format=fmt, dpi=100)
   buf.seek(0)
   return encode[fmt] + base64.b64encode(buf.getvalue()).decode('ascii')
 
