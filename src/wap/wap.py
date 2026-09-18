@@ -17,7 +17,6 @@ import re
 import time
 import urllib.request
 import warnings
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from logging.handlers import RotatingFileHandler
@@ -360,7 +359,8 @@ def plot2string(call, fmt='webp'):
   fig = plt.gcf()
   fig.text(.01, .015, SIGNATURE.format(year, call), fontsize=8, color='dimgray')
   buf = BytesIO()
-  plt.savefig(buf, format=fmt, dpi=100)
+  fig.savefig(buf, format=fmt, dpi=100)
+  plt.close()
   buf.seek(0)
   return encode[fmt] + base64.b64encode(buf.getvalue()).decode('ascii')
 
@@ -435,7 +435,6 @@ def radiation_pattern(data, call):
   set_title(ax, "Radiation Pattern")
 
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
@@ -605,7 +604,6 @@ def azimuth_scatter(data, call, min_points_to_display=2):
 
   set_title(ax, "Azimuth distance and density (aggregated)")
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
@@ -634,7 +632,6 @@ def band_distance(data, call):
 
   set_title(ax, "Distance / Band")
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
@@ -662,7 +659,6 @@ def hours_distance(data, call):
 
   set_title(ax, "Distance / Hour")
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
@@ -726,7 +722,6 @@ def takeoff_angle(data, call):
 
   plt.tight_layout(pad=1)
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
@@ -785,7 +780,6 @@ def plot_snr_vs_distance(data, call):
 
   plt.tight_layout(pad=1.8)
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
@@ -833,38 +827,30 @@ def snr_distance_errorbar(df, call):
 
   plt.tight_layout(pad=1.8)
   figure = plot2string(call)
-  plt.close()
   return figure
 
 
 def draw_all(data, call):
-  graph_tasks = (
+  graph_functions = (
     (azimuth_scatter, 'Azimuth scatter'),
     (radiation_pattern, 'Azimuth distance'),
     (band_distance, 'Distance / Band'),
     (hours_distance, 'Distance / Hours'),
     (plot_snr_vs_distance, 'SNR vs distance'),
-    (snr_distance_errorbar, 'SNR vs distance'),
+    (snr_distance_errorbar, 'SNR vs distance bars'),
     (takeoff_angle, 'Takeoff angle'),
   )
 
   graphs = {}
-  with ProcessPoolExecutor() as executor:
-    futures = {
-      executor.submit(func, data, call): (func, label)
-      for func, label in graph_tasks
-    }
-
-    for future in as_completed(futures):
-      func, label = futures[future]
-      try:
-        logging.info('Drawing: %s', label)
-        if graph := future.result():
-          graphs[func.__name__] = (label, graph)
-        else:
-          logging.warning('The call to %s returned None', func.__name__)
-      except ValueError as err:
-        logging.error('"%s": %s', label, err)
+  for func, label in graph_functions:
+    try:
+      logging.info('Drawing: %s', label)
+      if graph := func(data, call):
+        graphs[func.__name__] = (label, graph)
+      else:
+        logging.warning('The call to %s returned None', func.__name__)
+    except ValueError as err:
+      logging.error('"%s": %s', label, err)
 
   return graphs
 
