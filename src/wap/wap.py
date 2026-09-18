@@ -17,6 +17,7 @@ import re
 import time
 import urllib.request
 import warnings
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from logging.handlers import RotatingFileHandler
@@ -834,25 +835,34 @@ def snr_distance_errorbar(df, call):
 
 
 def draw_all(data, call):
-  graph_functions = (
+  graph_tasks = (
     (azimuth_scatter, 'Azimuth scatter'),
-    (radiation_pattern, 'Aimuth distance'),
+    (radiation_pattern, 'Azimuth distance'),
     (band_distance, 'Distance / Band'),
     (hours_distance, 'Distance / Hours'),
     (plot_snr_vs_distance, 'SNR vs distance'),
     (snr_distance_errorbar, 'SNR vs distance'),
     (takeoff_angle, 'Takeoff angle'),
   )
+
   graphs = {}
-  for func, label in graph_functions:
-    try:
-      logging.info('Drawing: %s', label)
-      if graph := func(data, call):
-        graphs[func.__name__] = (label, graph)
-      else:
-        logging.warning('The call to %s returned None', func.__name__)
-    except ValueError as err:
-      logging.error('"%s": %s', label, err)
+  with ProcessPoolExecutor() as executor:
+    futures = {
+      executor.submit(func, data, call): (func, label)
+      for func, label in graph_tasks
+    }
+
+    for future in as_completed(futures):
+      func, label = futures[future]
+      try:
+        logging.info('Drawing: %s', label)
+        if graph := future.result():
+          graphs[func.__name__] = (label, graph)
+        else:
+          logging.warning('The call to %s returned None', func.__name__)
+      except ValueError as err:
+        logging.error('"%s": %s', label, err)
+
   return graphs
 
 
