@@ -5,6 +5,9 @@
 #
 # Distributed under terms of the BSD 3-Clause license.
 
-__all__ = ["gen_filename", "fetch_and_filter", "render_html"]
+from .wap import (WSPRBand, fetch_and_filter, gen_filename, get_data,
+                  render_html)
 
-from .wap import fetch_and_filter, gen_filename, render_html
+__all__ = ["WSPRBand", "fetch_and_filter", "gen_filename", "get_data", "render_html"]
+
+__version__ = '0.1.3'
