@@ -10,4 +10,4 @@ from .wap import (WSPRBand, fetch_and_filter, gen_filename, get_data,
 
 __all__ = ["WSPRBand", "fetch_and_filter", "gen_filename", "get_data", "render_html"]
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
