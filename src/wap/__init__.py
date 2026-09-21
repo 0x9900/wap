@@ -8,6 +8,8 @@
 from .wap import (WSPRBand, fetch_and_filter, gen_filename, get_data,
                   render_html)
 
-__all__ = ["WSPRBand", "fetch_and_filter", "gen_filename", "get_data", "render_html"]
+__all__ = ["WSPRBand", "fetch_and_filter", "gen_filename", "get_data", "render_html",
+           "azimuth_scatter", "radiation_pattern", "band_distance", "hours_distance",
+           "plot_snr_vs_distance", "snr_distance_errorbar", "takeoff_angle",]
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'

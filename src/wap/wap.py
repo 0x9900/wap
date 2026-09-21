@@ -17,6 +17,7 @@ import re
 import time
 import urllib.request
 import warnings
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from logging.handlers import RotatingFileHandler
@@ -831,31 +832,38 @@ def snr_distance_errorbar(df, call):
 
 
 def draw_all(data, call):
-  graph_functions = (
+  graph_tasks = (
     (azimuth_scatter, 'Azimuth scatter'),
     (radiation_pattern, 'Azimuth distance'),
     (band_distance, 'Distance / Band'),
     (hours_distance, 'Distance / Hours'),
     (plot_snr_vs_distance, 'SNR vs distance'),
-    (snr_distance_errorbar, 'SNR vs distance bars'),
+    (snr_distance_errorbar, 'SNR vs distance'),
     (takeoff_angle, 'Takeoff angle'),
   )
 
   graphs = {}
-  for func, label in graph_functions:
-    try:
-      logging.info('Drawing: %s', label)
-      if graph := func(data, call):
-        graphs[func.__name__] = (label, graph)
-      else:
-        logging.warning('The call to %s returned None', func.__name__)
-    except ValueError as err:
-      logging.error('"%s": %s', label, err)
+  with ProcessPoolExecutor() as executor:
+    futures = {
+      executor.submit(func, data, call): (func, label)
+      for func, label in graph_tasks
+    }
+
+    for future in as_completed(futures):
+      func, label = futures[future]
+      try:
+        logging.info('Drawing: %s', label)
+        if graph := future.result():
+          graphs[func.__name__] = (label, graph)
+        else:
+          logging.warning('The call to %s returned None', func.__name__,)
+      except ValueError as err:
+        logging.error('"%s": %s', label, err)
 
   return graphs
 
 
-def render_html(data, output, call, antenna):
+def render_html(data, graphs, output, call, antenna):
   template_dir = Path(__file__).with_name('templates')
   static_dir = Path(__file__).with_name('static')
   env = Environment(loader=FileSystemLoader([template_dir, static_dir]))
@@ -863,7 +871,6 @@ def render_html(data, output, call, antenna):
   template = env.get_template('perf.html')
   start_time = data.time.min()
   end_time = data.time.max()
-  graphs = draw_all(data, call)
 
   pmap = plot_map(data, call)
   title = f'Antenna Analysis for {call}'
@@ -930,7 +937,8 @@ def run_call(call, days, antenna, bands, outfile):
   logging.info("%d records", df.shape[0])
 
   try:
-    render_html(df, outfile, call, antenna)
+    graphs = draw_all(df, call)
+    render_html(df, graphs, outfile, call, antenna)
   except Exception as err:  # pylint: disable=broad-exception-caught
     logging.error("Failed to process %s: %s", call, err)
 
