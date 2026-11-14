@@ -19,16 +19,16 @@
         {% if antenna %}
         <li>Antenna: <b>{{ antenna }}</b></li>
         {% endif %}
-        <li>WSPR data:
-            <b>from: {{ start.strftime('%Y-%m-%d %H:%M') }}
-                <span style="display: inline-block; width: 10px;"></span>
-                to: {{ end.strftime('%Y-%m-%d %H:%M') }}</b>
+        <li>Reception Reports from:
+            <b>{{ start.strftime('%Y-%m-%d %H:%M') }}</b><span style="display: inline-block; width: 10px;"></span>
+            to:
+            <b>{{ end.strftime('%Y-%m-%d %H:%M') }}</b>
         </li>
         <li>
             {% if data.shape[0] < 150 %}
-            Data processed: <b>{{ data.shape[0] }}</b> <span class="warning">You don't have enough spots</span>
+            Reception Reports processed: <b>{{ data.shape[0] }}</b> <span class="warning">You don't have enough spots</span>
             {% else %}
-            Data processed: <b>{{ data.shape[0] }}</b>
+            Reception Reports processed: <b>{{ data.shape[0] }}</b>
             {% endif %}
         </li>
         <li>Transmit power anounced:
