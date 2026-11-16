@@ -16,4 +16,4 @@ __all__ = [
   "radiation_pattern", "render_html", "snr_distance_errorbar", "takeoff_angle",
 ]
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
