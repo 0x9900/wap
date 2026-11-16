@@ -103,7 +103,7 @@ def plot_map(data, call):
   attr = ('&copy; <a href="https://www.OpenStreetMap.org/copyright">OpenStreetMap</a> '
           'contributors Fred <a href="https://qrz.com/db/W6BSD">W6BSD</a>')
 
-  wmap = folium.Map(location=latlon, zoom_start=3, tiles=None)
+  wmap = folium.Map(location=latlon, zoom_start=3, font_size="10px", tiles=None)
 
   folium.TileLayer(
     tiles='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
