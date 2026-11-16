@@ -29,6 +29,7 @@ import numpy as np
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 from matplotlib import font_manager
+from matplotlib.ticker import FuncFormatter
 from scipy.interpolate import pchip_interpolate, splev, splrep
 
 plt.switch_backend("Agg")   # force non-interactive backend, no GUI overhead
@@ -317,8 +318,15 @@ def get_data(call, delta):
   return data
 
 
-def format_band(value):
+def band_fmt(value):
   return f"{int(value)}m" if value >= 1 else f"{value:.2f}m"
+
+
+def compass_fmt(theta, _):
+  labels = {0: "N", 45: "NE",  90: "E", 135: "SE", 180: "S",
+            225: "SW", 270: "W", 315: "NE"}
+  deg = round(np.degrees(theta))
+  return labels.get(deg, f"{deg}°")
 
 
 def set_title(ax, title):
@@ -427,11 +435,15 @@ def radiation_pattern(data, call):
   for band, sub in df.groupby("band", sort=False):
     _plot_band_pattern(ax, sub, band, color_map[band], df)
 
+  ax.plot(0, 0, "x", color="white", markersize=8, label="Station")
   ax.set_theta_zero_location("N")
   ax.set_theta_direction(-1)
   ax.set_ylim(bottom=0, top=df['distance'].max() * 1.1)
   ax.set_rlabel_position(315)
   ax.tick_params(axis="y", labelsize=8)
+
+  ax.xaxis.set_major_formatter(FuncFormatter(compass_fmt))
+
   ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0), prop=LEGEND_FONT)
   set_title(ax, "Radiation Pattern")
 
@@ -598,8 +610,13 @@ def azimuth_scatter(data, call, min_points_to_display=2):
   ax.set_ylim(bottom=1)
   ax.set_theta_zero_location("N")
   ax.set_theta_direction(-1)
-  ax.tick_params(axis="y", labelsize=8)
+  ax.tick_params(axis="y", labelsize=10)
   ax.set_rlabel_position(310)
+  ax.xaxis.set_major_formatter(FuncFormatter(compass_fmt))
+
+  r_bottom = ax.get_ylim()[0]  # 1 in your case
+  ax.plot(0, r_bottom, "x", color="white", markersize=8, label="Station")
+
   ax.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0), prop=LEGEND_FONT)
   ax.set_rscale("log")
 
@@ -656,7 +673,7 @@ def hours_distance(data, call):
 
   plt.suptitle("")
   ax.set_xlabel("UTC Hours")
-  ax.set_ylabel('Distance / Hours')
+  ax.set_ylabel('Distance (km)')
 
   set_title(ax, "Distance / Hour")
   figure = plot2string(call)
@@ -757,18 +774,18 @@ def plot_snr_vs_distance(data, call):
 
   # Plot mean with std deviation band
   _, ax = plt.subplots()
-  ax.plot(stats_df['distance'], stats_df['snr_mean'], 'tab:blue', label='Mean SNR')
+  ax.plot(stats_df['distance'], stats_df['snr_mean'], 'ivory', label='Mean SNR')
   ax.fill_between(stats_df['distance'],
                   stats_df['snr_mean'] - stats_df['snr_std'],
                   stats_df['snr_mean'] + stats_df['snr_std'],
-                  alpha=0.3, color='tab:red', label='Mean ± 1σ')
+                  alpha=0.4, color='tab:red', label='Mean ± 1σ')
 
   # Plot IQR range (25th-75th percentile)
   ax.fill_between(stats_df['distance'], stats_df['snr_25th'], stats_df['snr_75th'],
-                  alpha=0.2, color='tab:cyan', label='IQR (25th-75th)')
+                  alpha=0.4, color='tab:cyan', label='IQR (25th-75th)')
 
   # Plot median and percentiles
-  ax.plot(stats_df['distance'], stats_df['snr_median'], color='tab:green', label='Median SNR')
+  ax.plot(stats_df['distance'], stats_df['snr_median'], color='yellow', label='Median SNR')
   ax.plot(stats_df['distance'], stats_df['snr_10th'], color='tab:red',
           linestyle='dotted', label='10th Percentile')
   ax.plot(stats_df['distance'], stats_df['snr_90th'], color='tab:red',
@@ -822,7 +839,7 @@ def snr_distance_errorbar(df, call):
   ax.set_ylabel('SNR (dB)', fontsize=12)
   set_title(ax, 'SNR Distribution vs Distance')
 
-  ax2.plot(stats["distance_center"], stats["count"], color=LIGHTBLUE, alpha=0.5)
+  ax2.plot(stats["distance_center"], stats["count"], color=LIGHTBLUE, alpha=0.7)
   ax2.set_ylabel("Number of spots", fontsize=12)
   ax2.grid(True, color="green", alpha=0.9)
 
